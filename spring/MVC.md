@@ -1,77 +1,173 @@
-여기서 form의 action을 보면 절대 경로(로 시작)이 아니라 상대경로(로 시작X)하는 것을 확인할 수 있다.
-이렇게 상대경로를 사용하면 폼 전송시 현재 URL이 속한 계층 경로 + save가 호출된다.
-현재 계층 경로: /servlet-mvc/members/
-결과: /servlet-mvc/members/save
+# spring mvc
 
-정리 : 중복되는 부분들이 너무 많다 이걸 해결한게 프론트 컨트롤러 패턴( 스프링 )
+- HttpServletRequest 역할
+
+HttpServletRequest를 사용하면 다음과 같은 HTTP 요청 메시지를 편리하게 조회할 수 있다.
+
+## HTTP 요청 데이터
+
+1. GET - 쿼리 파라미터 
+
+- 클라이언트에서 서버로 데이터를 전달할 때는 HTTP 메시지 바디를 사용하지 않기 때문에 content-type이 없다
+
+2. POST - HTML Form
+
+3. 공통 애노테이션
+
+- **@RequestParam**
+
+- @RequestParam의 name(value) 속성이 파라미터 이름으로 사용
+1. @RequestParam("username") String memberName 
+2. @RequestParam String username // 생략 가능 
+3.  완전 생략도 가능 But , 너무 과하다
+
+4. 주의! - 파라미터 이름만 사용
+/request-param?username=
+파라미터 이름만 있고 값이 없는 경우 빈문자로 통과
+5. 주의! - 기본형(primitive)에 null 입력
+/request-param 요청
+@RequestParam(required = false) int age
+null 을 int 에 입력하는 것은 불가능(500 예외 발생)
+따라서 null 을 받을 수 있는 Integer 로 변경하거나, 또는 다음에 나오는 defaultValue 사용
+
+-  **@ModelAttribute**
+
+1. @ModelAttribute 는 생략할 수 있다.
+
+2.  모델(Model)에 @ModelAttribute 로
+지정한 객체를 자동으로 넣어준다.
+
+3. @ModelAttribute 의 이름을 생략하면 모델에 저장될 때 클래스명을 사용한다. 이때 클래스의 첫글자만
+소문자로 변경해서 등록한다
+
+4. 스프링은 해당 생략시 다음과 같은 규칙을 적용한다.
+String , int , Integer 같은 단순 타입 = @RequestParam
+나머지 = @ModelAttribute (argument resolver 로 지정해둔 타입 외)
 
 
 
---mvc 프레임워크 만들기
-
-v1 - 프론트 컨트롤러 도입
-v2 - view 분류 
-1. 단순 반속 되는 뷰 로직 분리
-v3 - Model추가
-- 서블릿 종속성 제거
-- 뷰 이름 중복 제거
-v4- 단순하고 실용적인 컨트롤러
--v3 와 거의 비슷
--구현 입장에서 ModelAndView를 직접 생성해
-
-
-@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-----스프링 mvc 구조 이해
-
-dispatcher서블릿 ( 서블릿을 상속 받음)  이 doDispatch 호출한다
-
-1. handlerMapping : 핸들러 매핑에서 이 컨트롤러를 찾을 수 있어야 한다 ( 1순위 @RequestMapping (애노테이션 ) , 2 순위 빈이름 )
-2.  hanlderAdapter : 핸들러 매핑을 통해서 찾은 핸들러를 실행 할ㅇ 수 있는 핸들러 어댑터 ( 1순위 @RequestMapping(애노테이션)
- // v5 마지막 보자(dispatcher Servlet)
-
----로깅-----
- 
-sout 대신 로그쓰는이유 ( 레벨별로 로그를 남길 수 있어서) 
-테스트
-로그가 출력되는 포멧 확인
-시간, 로그 레벨, 프로세스 ID, 쓰레드 명, 클래스명, 로그 메시지
-로그 레벨 설정을 변경해서 출력 결과를 보자.
-LEVEL: TRACE > DEBUG > INFO > WARN > ERROR
-개발 서버는 debug 출력
-운영 서버는 info 출력
-@Slf4j 로 변경
-
-올바른 로그 사용법
-log.debug("data="+data)
-로그 출력 레벨을 info로 설정해도 해당 코드에 있는 "data="+data가 실제 실행이 되어 버린다.
-결과적으로 문자 더하기 연산이 발생한다.
-log.debug("data={}", data)
-로그 출력 레벨을 info로 설정하면 아무일도 발생하지 않는다. 따라서 앞과 같은 의미없는 연산이
-발생하지 않는다.
-
-로그는 파일로 남길 수도 있다
-성능도 좋다
-
---스프링 팁 --
-
-컨트롤러면서 반환값이 string이면 뷰리졸버를 찾게된다 
-
--롬복 @Data
-1. 객체를 바로 찍어도 toString덕분에 값이 나온다
-2. Require
-
--프로퍼티
-객체에 getUsername() , setUsername() 메서드가 있으면, 이 객체는 username 이라는 프로퍼티를
+- **프로퍼티**
+1. 객체에 getUsername() , setUsername() 메서드가 있으면, 이 객체는 username 이라는 프로퍼티를
 가지고 있다.
+2. username 프로퍼티의 값을 변경하면 setUsername() 이 호출되고, 조회하면 getUsername() 이
+호출된다
 
--@RequestParam
-1.   매개변수 값 생략가능 , 심지어 @RequestParam도 생략가능
-2.  쿼리스트링 아무것도 안넣으면 null이 아니라 빈문자("")로 들어와서 처리 해줘야함 ( 기본형 타입도 조심)
-3. defaultValue로 null이나 ""처리가능
 
--@ModelAttribute
-1. 쿼리스트링 대응 값 객체 setter찾아서 넣어줌
-2. 얘도 생략가능
+- **RedirectAttributes**
 
-기본형 같이 간단한 것 들은 @RequestParam , 지정된 객체 제외하고 나머지 객체들은 ModelAttribute
+1. 리다이렉트할때 쓸 데이터 가져감 ( addAttribute , 사용안하면 쿼리파라미터로 넘어감)
+2. RedirectAttributes 를 사용하면 URL 인코딩도 해주고, pathVarible , 쿼리 파라미터까지 처리해준다.
+
+
+- **HTTP message body**
+
+
+
+- @RequestBody
+1. @RequestBody 를 사용하면 HTTP 메시지 바디 정보를 편리하게 조회할 수 있다. 참고로 헤더 정보가
+필요하다면 HttpEntity 를 사용하거나 @RequestHeader 를 사용하면 된다.
+
+
+
+- @RequestBody 요청
+1. JSON 요청 - >HTTP 메시지 컨버터 -> 객체
+@ResponseBody 응답
+2. 객체  -> HTTP 메시지 컨버터  ->JSON 응답
+
+
+
+- **HTTP 메시지 컨버터**
+1. 뷰 템플릿으로 HTML을 생성해서 응답하는 것이 아니라, HTTP API처럼 JSON 데이터를 HTTP 메시지
+바디에서 직접 읽거나 쓰는 경우 HTTP 메시지 컨버터를 사용하면 편리하다.
+
+2. @ResponseBody 를 사용
+HTTP의 BODY에 문자 내용을 직접 반환
+viewResolver 대신에 HttpMessageConverter 가 동작
+
+3. 요청 매핑 헨들러 어뎁터 구조
+```
+                                   
+                                 HTTP 메시지 컨버터
+                                                 ↑
+                               ↙    ArgumentResolver    ↘
+
+서블릿 < ----------->      어댑터   <----------------- >   핸들러
+
+                               ↖   ReturnValueHandler   ↗
+```
+- HttpServletRequest , Model 은 물론이고, @RequestParam , @ModelAttribute 같은 애노테이션
+그리고 @RequestBody , HttpEntity 같은 HTTP 메시지를 처리하는 부분까지 매우 큰 유연함을
+보여주었다.
+- 이렇게 파라미터를 유연하게 처리할 수 있는 이유가 바로 ArgumentResolver 덕분이다.
+
+
+
+
+
+
+## HTTP 응답 - 정적 리소스, 뷰 템플릿
+
+
+1. 정적 리소스 경로
+src/main/resources/static
+뒤에 .html 로 URL바로 접근가능
+
+
+2. 뷰 템플릿
+뷰 템플릿을 거쳐서 HTML이 생성되고, 뷰가 응답을 만들어서 전달한다.
+일반적으로 HTML을 동적으로 생성하는 용도로 사용하지만, 다른 것들도 가능하다. 뷰 템플릿이 만들 수
+있는 것이라면 뭐든지 가능하다.
+
+
+
+### HttpServletResponse  역할
+- HTTP 응답 메시지 생성
+- HTTP 응답코드 지정
+- 헤더 생성
+- 바디 생성
+- 편의 기능 제공
+- Content-Type, 쿠키, Redirect
+
+
+
+## 서블릿, JSP, MVC 패턴
+
+
+
+
+- redirect vs forward
+1. 리다이렉트는 실제 클라이언트(웹 브라우저)에 응답이 나갔다가, 클라이언트가 redirect 경로로 다시
+요청한다. 따라서 클라이언트가 인지할 수 있고, URL 경로도 실제로 변경된다. 반면에 포워드는 서버
+내부에서 일어나는 호출이기 때문에 클라이언트가 전혀 인지하지 못한다.
+
+2. form의 action을 보면 절대 경로시작이 아니라 상대경로시작하는 것을 확인할 수 있다.
+이렇게 상대경로를 사용하면 폼 전송시 현재 URL이 속한 계층 경로 + save가 호출된다.
+ex 현재 계층 경로: /servlet-mvc/members/  결과: /servlet-mvc/members/save
+
+
+
+## 동작 순서
+
+1. 핸들러 조회: 핸들러 매핑을 통해 요청 URL에 매핑된 핸들러(컨트롤러)를 조회한다.
+2. 핸들러 어댑터 조회: 핸들러를 실행할 수 있는 핸들러 어댑터를 조회한다.
+3. 핸들러 어댑터 실행: 핸들러 어댑터를 실행한다.
+4. 핸들러 실행: 핸들러 어댑터가 실제 핸들러를 실행한다.
+5. ModelAndView 반환: 핸들러 어댑터는 핸들러가 반환하는 정보를 ModelAndView로 변환해서
+반환한다.
+6. viewResolver 호출: 뷰 리졸버를 찾고 실행한다.
+JSP의 경우: InternalResourceViewResolver 가 자동 등록되고, 사용된다.
+7. View 반환: 뷰 리졸버는 뷰의 논리 이름을 물리 이름으로 바꾸고, 렌더링 역할을 담당하는 뷰 객체를
+반환한다.
+JSP의 경우 InternalResourceView(JstlView) 를 반환하는데, 내부에 forward() 로직이 있다.
+8. 뷰 렌더링: 뷰를 통해서 뷰를 렌더링 한다.
+
+
+
+
+
+
+
+
+
+
 
